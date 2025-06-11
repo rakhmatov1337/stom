@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+  <main class="cart">
+    <div class="section-wrapper">
+      <div class="container">
+        <h1 class="category-heading">Корзина</h1>
+        <div class="cart-wrapper">
+          <div class="cart-product-list">
+            {% for item in cart_items %}
+              <div class="cart-product-item" data-product-id="{{ item.product_variant.product.id }}" data-size-id="{{ item.product_variant.size.id }}">
+                <img src="{{ item.product_variant.product.image.url }}" alt="{{ item.product_variant.product.name }}" />
+                <div class="cart-product-item-details">
+                  <p class="cart-product-name">{{ item.product_variant.product.name }} ({{ item.product_variant.size.name }})</p>
+                  <p class="cart-product-cost" data-unit-price="{{ item.product_variant.price }}">{{ item.product_variant.price|intcomma }} UZS</p>
+                  <div class="cart-product-adding">
+                    <button class="cart_decrement"><i class="fa-solid fa-minus"></i></button>
+                    <span>{{ item.quantity }} шт.</span>
+                    <button class="cart_increment"><i class="fa-solid fa-plus"></i></button>
+                  </div>
+                </div>
+              </div>
+            {% empty %}
+              <p>Ваша корзина пуста.</p>
+            {% endfor %}
+          </div>
+
+          <form method="post" action="{% url 'main:create-order' %}" class="cart-submitting">
+            {% csrf_token %}
+            <div class="container">
+              <p class="cart-text"></p>
+              <div class="cart-input-wrapper">
+                <p>Номер телефона</p>
+                <input name="phone_number" class="cart-input-data" required />
+              </div>
+              <div class="cart-input-wrapper">
+                <p>Адресс</p>
+                <input name="address" class="cart-input-data" required />
+              </div>
+              <div class="cart-details cost">
+                <p>Сумма заказа</p>
+                <p id="cart-total">{{ total_cost|floatformat:0|intcomma }} UZS</p>
+              </div>
+
+              <div class="cart-details total">
+                <p>Итого</p>
+                <p id="cart-grand">{{ grand_total|floatformat:0|intcomma }} UZS</p>
+              </div>
+              <button class="cart-submit">Заказать</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value
+    
+      function updateQuantity(productId, sizeId, count, span, item) {
+        fetch('/cart/update/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken
+          },
+          body: new URLSearchParams({
+            product_id: productId,
+            size_id: sizeId,
+            quantity: count
+          })
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.updated_quantity <= 0) {
+              item.remove()
+            } else {
+              span.textContent = `${data.updated_quantity} шт.`
+            }
+            updateSummary(data.total_cost)
+          })
+          .catch((error) => console.error('Xato:', error))
+      }
+    
+      function updateSummary(total) {
+        document.getElementById('cart-total').textContent = Number(total).toLocaleString('ru-RU') + ' UZS'
+        document.getElementById('cart-grand').textContent = Number(total).toLocaleString('ru-RU') + ' UZS'
+    
+        const cartText = document.querySelector('.cart-text')
+        cartText.textContent = ''
+      }
+    
+      document.querySelectorAll('.cart-product-item').forEach((item) => {
+        const productId = item.getAttribute('data-product-id')
+        const sizeId = item.getAttribute('data-size-id')
+        const costHolder = item.querySelector('.cart-product-cost')
+        const unitPrice = parseInt(costHolder.getAttribute('data-unit-price'))
+        const span = item.querySelector('span')
+    
+        item.querySelector('.cart_increment').addEventListener('click', () => {
+          let count = parseInt(span.textContent)
+          count++
+          updateQuantity(productId, sizeId, count, span, item)
+        })
+    
+        item.querySelector('.cart_decrement').addEventListener('click', () => {
+          let count = parseInt(span.textContent)
+          count = Math.max(count - 1, 0)
+          updateQuantity(productId, sizeId, count, span, item)
+        })
+      })
+    })
+  </script>
+{% endblock %}

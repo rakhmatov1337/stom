@@ -1,0 +1,96 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/all.css" />
+    <link rel="shortcut icon" href="{% static './assets/imgs/logo-icon.svg' %}" type="image/x-icon" />
+    <link rel="stylesheet" href="{% static './assets/css/style.css' %}" />
+    <link rel="stylesheet" href="{% static './assets/css/responsive.css' %}" />
+    <title>Exclusive Stom</title>
+  </head>
+  <body class="light-mode" style='background:white'>
+    <header>
+      <div class="section-wrapper">
+        <div class="container">
+          <div class="header-wrapper">
+            <a href="{% url 'main:home' %}" class="logo"><img src="{% static './assets/imgs/logo.svg' %}" alt="" /></a>
+            <form action="{% url 'main:product_search' %}" method="get" class="header-search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" name="q" placeholder="Поиск" required />
+            </form>
+            <div class="header-actions">
+              <a href="{% url 'main:cart' %}" title="Корзина" class="header-cart">
+                <i class="fa-regular fa-bag-shopping"></i>
+                <p>Корзина</p>
+                {% if request.resolver_match.url_name != 'cart' %}
+                  <span id="header-cart-count">0</span>
+                {% endif %}
+              </a>
+              <a href="{% url 'main:favorite-list' %}" title="Избранное" >
+                <i class="fa-regular fa-heart"></i>
+                <p>Избранное</p>
+              </a>
+              <a href="{% url 'main:home' %}" title="Избранное" >
+                <i class="fa-regular fa-home"></i>
+                <p>Домой</p>
+              </a>
+              {% if user.is_authenticated %}
+                <a href="{% url 'main:profile' %}" title="Профиль: {{ user.first_name }}">
+                  <i class="fa-solid fa-user"></i>
+                  {{ user.first_name }}
+                </a>
+              {% else %}
+                <a href="{% url 'accounts:login' %}" title="Вход в профиль">
+                  <i class="fa-regular fa-user"></i>
+                  <p>Войти</p>
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    
+    {% block content %}
+
+    {% endblock %}
+
+    <a href='tel:+998978004747' class="nigga_phone">
+      <i class="fa-regular fa-phone"></i> +998978004747
+    </a>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        fetch('/cart/count/')
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById('header-cart-count').textContent = data.total_items
+          })
+          .catch((err) => console.error('Cart count error:', err))
+      })
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.themeParams) {
+          const theme = Telegram.WebApp.themeParams;
+    
+          document.body.style.backgroundColor = theme.bg_color || "#fff";
+          document.body.style.color = theme.text_color || "#000";
+    
+          // Agar kerak bo‘lsa class qo‘shish
+          if (theme.bg_color && theme.bg_color.toLowerCase() === "#1c1c1e") {
+            document.body.classList.add("dark-theme")
+          }
+        }
+      });
+    </script>
+
+    <script src="{% static './assets/js/constants.js' %}"></script>
+    <script src="{% static './assets/js/main.js' %}"></script>
+    <script src="{% static './assets/js/product.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="{% static './assets/lib/js/swiper.conf.js' %}"></script>
+  </body>
+</html>

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+  <div class="auth">
+    <div class="section-wrapper">
+      <div class="container">
+        <div class="auth-wrapper">
+          <form action="{% url 'accounts:register' %}" method="post" class="auth-form">
+            {% csrf_token %}
+            <h1 class="auth-form-heading">Регистрация</h1>
+            <p class="auth-form-helper-text">Введите указанные поля</p>
+            {% if form.non_field_errors %}
+              <p class="auth-form-error-text">{{ form.non_field_errors }}</p>
+            {% endif %}
+
+            <label for="id_first_name">Имя</label>
+            <div class="auth-input-wrapper">
+              <input id="id_first_name" name="first_name" type="text" value="{{ form.first_name.value|default:'' }}" />
+              {% for error in form.first_name.errors %}
+                <span class="error">{{ error }}</span>
+              {% endfor %}
+            </div>
+
+            <label for="id_last_name">Фамилия</label>
+            <div class="auth-input-wrapper">
+              <input id="id_last_name" name="last_name" type="text" value="{{ form.last_name.value|default:'' }}" />
+              {% for error in form.last_name.errors %}
+                <span class="error">{{ error }}</span>
+              {% endfor %}
+            </div>
+
+            <label for="id_phone_number">Номер телефона</label>
+            <div class="auth-input-wrapper">
+              <span>+998</span>
+              <input id="id_phone_number" name="phone_number" type="text" value="{{ form.phone_number.value|default:'' }}" />
+              {% for error in form.phone_number.errors %}
+                <span class="error">{{ error }}</span>
+              {% endfor %}
+            </div>
+
+            <label for="id_password1">Пароль</label>
+            <div class="auth-input-wrapper password">
+              <input id="id_password1" name="password1" type="password" />
+              <i class="fa-solid fa-eye"></i>
+              {% for error in form.password1.errors %}
+                <span class="error">{{ error }}</span>
+              {% endfor %}
+            </div>
+
+            <label for="id_password2">Пароль (повторно)</label>
+            <div class="auth-input-wrapper password">
+              <input id="id_password2" name="password2" type="password" />
+              <i class="fa-solid fa-eye"></i>
+              {% for error in form.password2.errors %}
+                <span class="error">{{ error }}</span>
+              {% endfor %}
+            </div>
+
+            <button type="submit" class="auth-button">Зарегистрироваться</button>
+            <p class="auth-helper-text">
+              У вас есть аккаунт? <a href="{% url 'accounts:login' %}">Вход</a>
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'assets/js/password.js' %}"></script>
+{% endblock %}

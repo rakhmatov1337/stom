@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+
+  <main>
+    <div class="resulted-products">
+      <div class="products" id="category_1">
+        <div class="section-wrapper">
+          <div class="container">
+            <div class="resulted-product">
+              <h1 class="category-heading">Избранное</h1>
+
+              <div class="category-product-list">
+                {% for fav in favorites %}
+                  <div class="category-product-item" data-product-id="{{ fav.product.id }}">
+                    <div class="category-product-header">
+                      <div class="tags">
+                        {% if fav.product.is_hit %}
+                          <span>HIT</span>
+                        {% endif %}
+                        {% if fav.product.is_sale %}
+                          <span>SALE</span>
+                        {% endif %}
+                        {% if fav.product.is_new %}
+                          <span>NEW</span>
+                        {% endif %}
+                      </div>
+                      <button class="favorite-toggle">
+                        <i class="fa-solid fa-heart"></i>
+                      </button>
+                    </div>
+                
+                    <a href="#"><img src="{{ fav.product.image.url }}" alt="{{ fav.product.name }}" class="category-product-image" /></a>
+                    <p class="category-product-title">{{ fav.product.name }}</p>
+                    <p class="category-product-usd">{{ fav.product.price_usd }}$</p>
+                    <div class="card-bottom">
+                     {% if fav.product.discount > 0 %}
+                      <p class="category-product-cost">
+                        {{ fav.product.discounted_price|floatformat:0|intcomma }} UZS
+                      </p>
+                      <div class="category-product-discount">
+                        <p class="category-product-discount-cost">
+                          <del>{{ fav.product.price|floatformat:0|intcomma }} UZS</del>
+                        </p>
+                        <span class="category-discount-perc">-{{ fav.product.discount }}%</span>
+                      </div>
+                    {% else %}
+                      <p class="category-product-cost">
+                        {{ fav.product.price|floatformat:0|intcomma }} UZS
+                      </p>
+                    {% endif %}
+                      <form method="post" class="add-to-cart-form">
+                        {% csrf_token %}
+                        <button type="submit" class="category-product-add-btn">Добавить в корзину</button>
+                      </form>
+                
+                      <div class="category-product-adding" style="display: none;">
+                        <button class="category_decrement"><i class="fa-solid fa-minus"></i></button>
+                        <span>1 шт.</span>
+                        <button class="category_increment"><i class="fa-solid fa-plus"></i></button>
+                      </div>
+                    </div>
+                  </div>
+                {% empty %}
+                  <p>Избранных товаров нет.</p>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value
+      const headerCart = document.querySelector('.header-cart span')
+    
+      // Favorite Toggle
+      document.querySelectorAll('.favorite-toggle').forEach((button) => {
+        button.onclick = function () {
+          const productItem = this.closest('.category-product-item')
+          const productId = productItem.getAttribute('data-product-id')
+          fetch('/favorite/add/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-CSRFToken': csrfToken
+            },
+            body: new URLSearchParams({ product_id: productId })
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.status === 'removed') {
+                if (window.location.pathname === '/favorite/') {
+                  productItem.remove()
+                }
+                this.innerHTML = '<i class="fa-regular fa-heart"></i>'
+              } else {
+                this.innerHTML = '<i class="fa-solid fa-heart"></i>'
+              }
+            })
+        }
+      })
+    
+      // ADD TO CART
+      document.querySelectorAll('.add-to-cart-form').forEach((form) => {
+        form.onsubmit = function (e) {
+          e.preventDefault()
+          const productItem = this.closest('.category-product-item')
+          const productId = productItem.getAttribute('data-product-id')
+          fetch('/cart/add/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-CSRFToken': csrfToken
+            },
+            body: new URLSearchParams({ product_id: productId })
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.total_items !== undefined) {
+                headerCart.textContent = data.total_items
+              }
+              this.style.display = 'none'
+              const qtyPanel = productItem.querySelector('.category-product-adding')
+              qtyPanel.style.display = 'block'
+              qtyPanel.querySelector('span').textContent = '1 шт.'
+            })
+        }
+      })
+    
+      // INCREMENT
+      document.querySelectorAll('.category_increment').forEach((btn) => {
+        btn.onclick = function () {
+          const productItem = this.closest('.category-product-item')
+          const productId = productItem.getAttribute('data-product-id')
+          const quantitySpan = productItem.querySelector('.category-product-adding span')
+          let count = parseInt(quantitySpan.textContent)
+          count++
+          updateCartQuantity(productId, count, quantitySpan, productItem)
+        }
+      })
+    
+      // DECREMENT
+      document.querySelectorAll('.category_decrement').forEach((btn) => {
+        btn.onclick = function () {
+          const productItem = this.closest('.category-product-item')
+          const productId = productItem.getAttribute('data-product-id')
+          const quantitySpan = productItem.querySelector('.category-product-adding span')
+          let count = parseInt(quantitySpan.textContent)
+          count = Math.max(count - 1, 0)
+          updateCartQuantity(productId, count, quantitySpan, productItem)
+        }
+      })
+    
+      // Update Function
+      function updateCartQuantity(productId, quantity, quantitySpan, productItem) {
+        fetch('/cart/update/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken
+          },
+          body: new URLSearchParams({ product_id: productId, quantity: quantity })
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.total_items !== undefined) {
+              headerCart.textContent = data.total_items
+            }
+            if (data.updated_quantity <= 0) {
+              if (productItem) {
+                productItem.querySelector('.category-product-adding').style.display = 'none'
+                productItem.querySelector('.add-to-cart-form').style.display = 'block'
+              }
+            } else {
+              quantitySpan.textContent = `${data.updated_quantity} шт.`
+            }
+          })
+          .catch((error) => console.error('Miqdor yangilanish xatosi:', error))
+      }
+    })
+  </script>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+  <div class="profile">
+    <div class="section-wrapper">
+      <div class="container">
+        <div class="profile-details-heading">
+          <h1>{{ user.get_full_name }}</h1>
+          <a href="{% url 'accounts:logout' %}"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+        </div>
+
+        {% if current_order %}
+          <a href="{% url 'main:order-detail' current_order.id %}" class="profile-current-order">
+            <img src="{{ current_order.items.first.product.image.url }}" alt="" />
+            <div class="profile-order-details">
+              <p class="order-title">
+                {% for item in current_order.items.all %}
+                  {{ item.product.name }}{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                  Нет товаров
+                {% endfor %}
+              </p>
+              <p class="order-status {{ current_order.status }}">{{ current_order.get_status_display }}</p>
+              <p class="order-time">{{ current_order.created_at|date:'H:i-d.m.Y' }}</p>
+            </div>
+          </a>
+        {% endif %}
+
+        <div class="profile-details">
+          <a href="{% url 'main:my-orders' %}" class="profile-item">
+            <span><i class="fa-regular fa-file-lines"></i></span>
+            <div class="profile-order-heading">
+              <h1>Мои заказы</h1>
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+
+          <a href="{% url 'main:favorite-list' %}" class="profile-item">
+            <span><i class="fa-regular fa-heart"></i></span>
+            <div class="profile-order-heading">
+              <h1>Избранное</h1>
+              <i class="fa-solid fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

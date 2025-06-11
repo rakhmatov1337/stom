@@ -1,0 +1,238 @@
+{% extends 'base.html' %} {% load static %} {% load humanize %}
+{% block content %}
+  <meta name="csrf-token" content="{{ csrf_token }}" />
+  <main class="home-main">
+    <div class="category-tags">
+      <div class="section-wrapper">
+        <div class="container">
+          <div class="category-list">
+            {% for category in categories %}
+              <a href="#category_{{ category.id }}" class="category-item" data-category-id="{{ category.id }}">{{ category.name }}</a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero">
+      <div class="section-wrapper">
+        <div class="container">
+          <div class="hero-wrapper">
+            <div class="swiper">
+              <div class="swiper-wrapper">
+                {% for bigpic in bigpics %}
+                  <div class="swiper-slide" style="background-image: url('{{ bigpic.picture.url }}');"></div>
+                {% endfor %}
+              </div>
+              <div class="swiper-pagination"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="products">
+      <div class="section-wrapper">
+        <div class="container">
+          <div class="products-wrapper">
+            {% for category in categories %}
+              <div id="category_{{ category.id }}" class="category-product">
+                <h1 class="category-heading">{{ category.name }}</h1>
+                <div class="category-product-list">
+                  {% for product in products %}
+                    {% if product.category.id == category.id %}
+                      <div class="category-product-item" data-product-id="{{ product.id }}">
+                        <div class="category-product-header">
+                          <div class="tags">
+                            {% if product.is_hit %}
+                              <span>HIT</span>
+                            {% endif %} {% if product.is_sale %}
+                              <span>SALE</span>
+                            {% endif %} {% if product.is_new %}
+                              <span>NEW</span>
+                            {% endif %}
+                          </div>
+                          <button class="favorite-toggle" data-product-id="{{ product.id }}">
+                            {% if product.is_favorite %}
+                              <i class="fa-solid fa-heart"></i>
+                            {% else %}
+                              <i class="fa-regular fa-heart"></i>
+                            {% endif %}
+                          </button>
+                        </div>
+                        <a href="{% url 'main:product-detail' product.id %}"><img src="{{ product.image.url }}" alt="{{ product.name }}" class="category-product-image" /></a>
+                        <p class="category-product-title">{{ product.name }}</p>
+                        <p class="category-product-usd">{{ product.price_usd }}$</p>
+                        <div class="card-bottom">
+                          {% if product.discount > 0 %}
+                            <p class="category-product-cost">{{ product.discounted_price|floatformat:0|intcomma }} UZS</p>
+                            <div class="category-product-discount">
+                              <p class="category-product-discount-cost">
+                                <del>{{ product.price|floatformat:0|intcomma }} UZS</del>
+                              </p>
+                              <span class="category-discount-perc">-{{ product.discount }}%</span>
+                            </div>
+                          {% else %}
+                            <p class="category-product-cost">{{ product.price|floatformat:0|intcomma }} UZS</p>
+                          {% endif %}
+                          <a href="{% url 'main:product-detail' product.id %}" class="view-product-btn">Смотреть продукт</a>
+                        </div>
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <br /><br /><br /><br /><br />
+    <br /><br /><br /><br /><br />
+    <br /><br /><br /><br /><br />
+    <br /><br /><br /><br /><br />
+  </main>
+
+  <style>
+    .view-product-btn {
+      background-color: var(--main-color);
+      color: #fff;
+      padding: 8px 16px;
+      display: inline-block;
+      border-radius: 4px;
+      font-size: 14px;
+      text-decoration: none;
+      text-align: center;
+      margin-top: 10px;
+      width: 100%;
+    
+      &:hover {
+        background: var(--color-white);
+        color: var(--main-color);
+      }
+    }
+    
+    .category-item.active {
+      color: #fff;
+    }
+    
+    .category-item {
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+    
+    .category-item:hover {
+      background-color: #eee;
+    }
+    
+    .category-tags {
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 100;
+      padding: 10px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+
+  {% block scripts %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        const headerCart = document.querySelector('.header-cart span')
+        const loginUrl = "{% url 'accounts:login' %}?next=" + window.location.pathname
+        const categoryItems = document.querySelectorAll('.category-item')
+        const categoryProducts = document.querySelectorAll('.category-product')
+      
+        // Handle clicks on category items
+        categoryItems.forEach((item) => {
+          item.addEventListener('click', function (e) {
+            e.preventDefault()
+      
+            // Get the target element ID from href
+            const targetId = this.getAttribute('href')
+            const targetElement = document.querySelector(targetId)
+      
+            if (targetElement) {
+              // Update active class
+              categoryItems.forEach((cat) => cat.classList.remove('active'))
+              this.classList.add('active')
+      
+              // Scroll to the target element
+              const offsetTop = targetElement.getBoundingClientRect().top + window.pageYOffset
+      
+              window.scrollTo({
+                top: offsetTop - 100,
+                behavior: 'smooth'
+              })
+            }
+          })
+        })
+      
+        // Update active category based on scroll position
+        function updateActiveCategory() {
+          let currentCategory = null
+          let closestDistance = Infinity
+      
+          // Find the closest category to the viewport
+          categoryProducts.forEach((section) => {
+            const rect = section.getBoundingClientRect()
+            const distance = Math.abs(rect.top)
+      
+            if (distance < closestDistance) {
+              closestDistance = distance
+              currentCategory = section.id.replace('category_', '')
+            }
+          })
+      
+          // Update active class
+          if (currentCategory) {
+            categoryItems.forEach((item) => {
+              const itemCategory = item.getAttribute('data-category-id')
+              if (itemCategory === currentCategory) {
+                item.classList.add('active')
+              } else {
+                item.classList.remove('active')
+              }
+            })
+          }
+        }
+      
+        // Listen for scroll events
+        window.addEventListener('scroll', updateActiveCategory)
+      
+        // Initial update
+        updateActiveCategory()
+      
+        // FAVORITE TOGGLE
+        document.querySelectorAll('.favorite-toggle').forEach((button) => {
+          button.addEventListener('click', function () {
+            const productItem = this.closest('.category-product-item')
+            const productId = productItem.getAttribute('data-product-id')
+      
+            fetch('/favorite/add/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken
+              },
+              body: new URLSearchParams({ product_id: productId })
+            })
+              .then((response) => {
+                if (response.status === 302 || response.redirected) {
+                  window.location.href = loginUrl
+                  return
+                }
+                return response.json()
+              })
+              .then((data) => {
+                if (!data) return
+                this.innerHTML = data.status === 'removed' ? '<i class="fa-regular fa-heart"></i>' : '<i class="fa-solid fa-heart"></i>'
+              })
+              .catch((error) => console.error('Favorite error:', error))
+          })
+        })
+      })
+    </script>
+  {% endblock %}
+{% endblock %}

@@ -1,0 +1,1 @@
+from stom_bazar.wsgi import application

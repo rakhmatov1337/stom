@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% block title %}
+  Мои заказы
+{% endblock %}
+{% block content %}
+  <div class="my-orders">
+    <div class="section-wrapper">
+      <div class="container">
+        <h1 class="category-heading order-heading-text">История заказов</h1>
+        <div class="orders-wrapper">
+          {% for order in orders %}
+            <a href="{% url 'main:order-detail' order.id %}" class="order">
+              <div class="order-heading">
+                <p class="order-time">{{ order.created_at_local|date:'H:i - d.m.Y' }}</p>
+                <p class="order-status warning">{{ order.get_status_display }}</p>
+              </div>
+              <p class="order-name">
+                {% if order.items.first %}
+                  {{ order.items.first.product.name }}
+                  {% if order.items.count > 1 %}
+                    и еще {{ order.items.count|add:'-1' }} товаров
+                  {% endif %}
+                {% else %}
+                  Без товаров
+                {% endif %}
+              </p>
+
+              <div class="order-images">
+                {% for item in order.items.all|slice:':2' %}
+                  <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" />
+                {% endfor %}
+              </div>
+
+              <div class="order-cost">
+                <p class="order-cost-text">Сумма</p>
+                <p class="order-cost-number">{{ order.total_price|floatformat:0|intcomma }} сум</p>
+              </div>
+            </a>
+          {% empty %}
+            <p>У вас пока нет заказов.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

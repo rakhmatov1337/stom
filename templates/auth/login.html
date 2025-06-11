@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+  <div class="auth">
+    <div class="section-wrapper">
+      <div class="container">
+        <div class="auth-wrapper">
+          <form action="{% url 'accounts:login' %}?next={{ request.GET.next|default:'/' }}" method="post" class="auth-form">
+            {% csrf_token %}
+            <h1 class="auth-form-heading">Вход в профиль</h1>
+            <p class="auth-form-helper-text">Введите указанные поля</p>
+            {% if form.non_field_errors %}
+              <p class="auth-form-error-text">{{ form.non_field_errors }}</p>
+            {% endif %}
+
+            <label for="id_username">Номер телефона</label>
+            <div class="auth-input-wrapper">
+              <span>+998</span>
+              <input id="id_username" name="username" type="text" value="{{ form.username.value|default:'' }}" />
+              {% for error in form.username.errors %}
+                <span class="error">{{ error }}</span>
+              {% endfor %}
+            </div>
+
+            <label for="id_password">Пароль</label>
+            <div class="auth-input-wrapper password">
+              <input id="id_password" name="password" type="password" />
+              <i class="fa-solid fa-eye"></i>
+              {% for error in form.password.errors %}
+                <span class="error">{{ error }}</span>
+              {% endfor %}
+            </div>
+
+            <button type="submit" class="auth-button">Войти</button>
+            <p class="auth-helper-text">
+              У вас нет аккаунта? <a href="{% url 'accounts:register' %}">Зарегистрировать</a>
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'assets/js/password.js' %}"></script>
+{% endblock %}

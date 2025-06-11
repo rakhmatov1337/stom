@@ -1,0 +1,85 @@
+{% extends 'base.html' %} {% load static %} {% load humanize %}
+{% block content %}
+  <main class="detail">
+    <div class="section-wrapper">
+      <div class="container">
+        <div class="detail-wrapper">
+          <div class="detail-image">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" />
+          </div>
+          <div class="detail-info">
+            <h1 class="detail-name">{{ product.name }}</h1>
+            <p class="detail-description">{{ product.description }}</p>
+            <p class="detail-price" id="price-display">{{ product.price|floatformat:0|intcomma }} UZS</p>
+
+            <div class="size-options">
+              <form method="post" action="{% url 'cart:add-to-cart' %}" class="detail-form">
+                {% csrf_token %}
+                <input type="hidden" name="product_id" value="{{ product.id }}" />
+                <input type="hidden" name="quantity" value="1" id="qty-input" />
+
+                {% if product.variants.all %}
+                  <h3>O'lchamni tanlang</h3>
+                  {% for variant in product.variants.all %}
+                    <div class="size-option">
+                      <input type="radio" id="size-{{ variant.size.id }}" name="variant_id" value="{{ variant.id }}" data-price="{{ variant.price }}" />
+                      <label for="size-{{ variant.size.id }}">{{ variant.size.name }}</label>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+
+                <div class="detail-adding">
+                  <button type="button" class="category_decrement"><i class="fa-solid fa-minus"></i></button>
+                  <span id="qty-span">1 шт.</span>
+                  <button type="button" class="category_increment"><i class="fa-solid fa-plus"></i></button>
+                </div>
+
+                <button type="submit" class="add-to-cart" disabled>Добавить в корзину</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const qtySpan = document.getElementById('qty-span')
+      const qtyInput = document.getElementById('qty-input')
+      let qty = 1
+    
+      const addToCartBtn = document.querySelector('.add-to-cart')
+      const variantRadios = document.querySelectorAll('input[name=variant_id]')
+    
+      document.querySelector('.category_increment').addEventListener('click', () => {
+        qty++
+        qtySpan.textContent = `${qty} шт.`
+        qtyInput.value = qty
+      })
+    
+      document.querySelector('.category_decrement').addEventListener('click', () => {
+        if (qty > 1) qty--
+        qtySpan.textContent = `${qty} шт.`
+        qtyInput.value = qty
+      })
+    
+      variantRadios.forEach((radio) => {
+        radio.addEventListener('change', function () {
+          const priceDisplay = document.getElementById('price-display')
+          const price = parseFloat(this.getAttribute('data-price'))
+          priceDisplay.textContent = price.toLocaleString('ru-RU') + ' UZS'
+    
+          if (this.checked) {
+            addToCartBtn.disabled = false
+          }
+        })
+      })
+      if (![...variantRadios].some((radio) => radio.checked)) {
+        addToCartBtn.disabled = true
+      } else {
+        addToCartBtn.disabled = false
+      }
+    })
+  </script>
+{% endblock %}

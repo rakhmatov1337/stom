@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<main>
+    <div class="resulted-products">
+        <div class="products">
+            <div class="section-wrapper">
+                <div class="container">
+                    <div class="resulted-product">
+                        <h1 class="category-heading">
+                            {% if products %}
+                                Товары по запросу: "{{ query }}"
+                            {% else %}
+                                Ничего не найдено по запросу: "{{ query }}"
+                            {% endif %}
+                        </h1>
+
+                        <div class="category-product-list">
+                            {% for product in products %}
+                                <div class="category-product-item" data-product-id="{{ product.id }}">
+                                    <div class="category-product-header">
+                                        <div class="tags">
+                                            <span>HIT</span>
+                                            <span>SALE</span>
+                                            <span>NEW</span>
+                                        </div>
+                                        <button><i class="fa-regular fa-heart"></i></button>
+                                    </div>
+                                    <a href="#"><img src="{{ product.image.url }}" alt="{{ product.name }}" class="category-product-image" /></a>
+                                    <p class="category-product-title">{{ product.name }}</p>
+                                    <p class="category-product-usd">{{ product.price_usd }}$</p>
+                                    <div class="card-bottom">
+                                        <p class="category-product-cost">{{ product.price|floatformat:0|intcomma }} UZS</p>
+                                        <button class="category-product-add-btn">Добавить в корзину</button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

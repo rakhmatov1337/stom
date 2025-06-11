@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+  <div class="order-detail">
+    <div class="section-wrapper">
+      <div class="container">
+        <h1 class="category-heading order-heading-text">Заказ №{{ order.id }}</h1>
+        <div class="order-upper">
+          <div class="order-wrapper">
+            {% for item in order_items %}
+              <div class="order-item">
+                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" />
+                <div class="order-item-details">
+                  <p class="order-name">{{ item.product.name }} - {{ item.size.name }}</p>
+                  <p class="order-count">
+                    <span>{{ item.quantity }} шт.</span>
+                    <span class="order-cost">{{ item.price|floatformat:0|intcomma }} UZS</span>
+                  </p>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+          <div class="order-details">
+            <div class="order-detail-text">
+              <span>Стоимость доставки</span>
+              <p>{{ order.delivery_cost|default:'30 000' }} UZS</p>
+            </div>
+            <div class="order-detail-text">
+              <span>Имя</span>
+              <p>{{ order.user.first_name }} {{ order.user.last_name }}</p>
+            </div>
+            <div class="order-detail-text">
+              <span>Телефон</span>
+              <p>{{ order.phone_number }}</p>
+            </div>
+            <div class="order-detail-text">
+              <span>Сумма</span>
+              <p>{{ order.total_price|floatformat:0|intcomma }} UZS</p>
+            </div>
+            <div class="order-detail-text">
+              <span>Адрес</span>
+              <p>{{ order.address }}</p>
+            </div>
+            <div class="order-detail-text">
+              <span>Время заказа</span>
+              <p>{{ order.created_at|date:'d M Y, H:i' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
