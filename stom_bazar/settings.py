@@ -13,9 +13,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-MEDIA_DIR = os.path.join(os.path.dirname(BASE_DIR), 'public_html')
-
+BASE_DIR = Path(__file__).resolve().parent.parent  # /var/www/stom
+MEDIA_DIR = BASE_DIR / 'public_html'
+MEDIA_ROOT = MEDIA_DIR / 'media'
+MEDIA_URL = '/media/'
 
 
 # Quick-start development settings - unsuitable for production
