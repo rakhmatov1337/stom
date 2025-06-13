@@ -24,11 +24,18 @@
                 <div class="size-options">
                   <h3>O'lchamni tanlang</h3>
                   {% for variant in product.variants.all %}
-                    <div class="size-option">
-                      <input type="radio" id="size-{{ variant.size.id }}" name="variant_id" value="{{ variant.id }}" data-price="{{ variant.price }}" />
-                      <label for="size-{{ variant.size.id }}">{{ variant.size.name }}</label>
-                    </div>
-                  {% endfor %}
+                  <div class="size-option">
+                    <input 
+                      type="radio" 
+                      id="size-{{ variant.size.id }}" 
+                      name="variant_id" 
+                      value="{{ variant.id }}" 
+                      data-price="{{ variant.price }}"
+                      {% if forloop.first %}checked{% endif %}
+                    />
+                    <label for="size-{{ variant.size.id }}">{{ variant.size.name }}</label>
+                  </div>
+                {% endfor %}
                 </div>
               {% endif %}
 
@@ -84,37 +91,48 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const qtySpan = document.getElementById('qty-span')
-      const qtyInput = document.getElementById('qty-input')
-      let qty = 1
+      const qtySpan      = document.getElementById('qty-span');
+      const qtyInput     = document.getElementById('qty-input');
+      const addToCartBtn = document.querySelector('.add-to-cart');
+      const variantRadios = [...document.querySelectorAll('input[name="variant_id"]')];
     
-      const addToCartBtn = document.querySelector('.add-to-cart')
-      const variantRadios = document.querySelectorAll('input[name="variant_id"]')
+      let qty = 1;
+      qtyInput.value = qty;
+      qtySpan.textContent = `${qty} шт.`;
     
       document.querySelector('.category_increment').addEventListener('click', () => {
-        qty++
-        qtySpan.textContent = `${qty} шт.`
-        qtyInput.value = qty
-      })
+        qty++;
+        qtyInput.value = qty;
+        qtySpan.textContent = `${qty} шт.`;
+      });
     
       document.querySelector('.category_decrement').addEventListener('click', () => {
-        if (qty > 1) qty--
-        qtySpan.textContent = `${qty} шт.`
-        qtyInput.value = qty
-      })
+        if (qty > 1) qty--;
+        qtyInput.value = qty;
+        qtySpan.textContent = `${qty} шт.`;
+      });
+    
+      function updatePriceAndButton(radio) {
+        const priceDisplay = document.getElementById('price-display');
+        const price = parseFloat(radio.dataset.price);
+        priceDisplay.textContent = price.toLocaleString('ru-RU') + ' UZS';
+        addToCartBtn.disabled = false;
+      }
     
       variantRadios.forEach((radio) => {
         radio.addEventListener('change', function () {
-          const priceDisplay = document.getElementById('price-display')
-          const price = parseFloat(this.getAttribute('data-price'))
-          priceDisplay.textContent = price.toLocaleString('ru-RU') + ' UZS'
+          updatePriceAndButton(this);
+        });
+      });
     
-          addToCartBtn.disabled = !this.checked
-        })
-      })
+      // 1) Enable button only when a variant is selected
+      addToCartBtn.disabled = true;
     
-      // disable button until a size is selected
-      addToCartBtn.disabled = ![...variantRadios].some((radio) => radio.checked)
-    })
+      // 2) If one is already checked (we marked the first), trigger its change
+      const initiallyChecked = variantRadios.find(r => r.checked);
+      if (initiallyChecked) {
+        updatePriceAndButton(initiallyChecked);
+      }
+    });    
   </script>
 {% endblock %}
