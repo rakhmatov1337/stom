@@ -14,7 +14,7 @@
 }
 
 :root {
-  --main-color: #f43f5e;
+  --main-color: #418699;
   --color-dark: #333;
   --color-success: #2d6a4f;
   --color-success-outline: #95d5b2;
@@ -281,12 +281,8 @@ main {
         gap: 4px;
 
         span {
-          background: linear-gradient(
-            to right,
-            var(--color-danger),
-            var(--main-color),
-            var(--color-warning)
-          );
+          background: linear-gradient(to right,
+              var(--main-color));
           color: var(--color-white);
           padding: 2px 6px;
           border-radius: 20px;
@@ -965,7 +961,7 @@ main {
   transition: all 0.3s ease;
 }
 
-.size-option input[type="radio"]:checked + label {
+.size-option input[type="radio"]:checked+label {
   background-color: var(--main-color);
   color: white;
   border-color: var(--main-color);
