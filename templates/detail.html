@@ -1,4 +1,7 @@
-{% extends 'base.html' %} {% load static %} {% load humanize %}
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
 {% block content %}
   <main class="detail">
     <div class="section-wrapper">
@@ -12,13 +15,13 @@
             <p class="detail-description">{{ product.description }}</p>
             <p class="detail-price" id="price-display">{{ product.price|floatformat:0|intcomma }} UZS</p>
 
-            <div class="size-options">
-              <form method="post" action="{% url 'cart:add-to-cart' %}" class="detail-form">
-                {% csrf_token %}
-                <input type="hidden" name="product_id" value="{{ product.id }}" />
-                <input type="hidden" name="quantity" value="1" id="qty-input" />
+            <form method="post" action="{% url 'cart:add-to-cart' %}" class="detail-form">
+              {% csrf_token %}
+              <input type="hidden" name="product_id" value="{{ product.id }}" />
+              <input type="hidden" name="quantity" value="1" id="qty-input" />
 
-                {% if product.variants.all %}
+              {% if product.variants.exists %}
+                <div class="size-options">
                   <h3>O'lchamni tanlang</h3>
                   {% for variant in product.variants.all %}
                     <div class="size-option">
@@ -26,22 +29,58 @@
                       <label for="size-{{ variant.size.id }}">{{ variant.size.name }}</label>
                     </div>
                   {% endfor %}
-                {% endif %}
-
-                <div class="detail-adding">
-                  <button type="button" class="category_decrement"><i class="fa-solid fa-minus"></i></button>
-                  <span id="qty-span">1 шт.</span>
-                  <button type="button" class="category_increment"><i class="fa-solid fa-plus"></i></button>
                 </div>
+              {% endif %}
 
-                <button type="submit" class="add-to-cart" disabled>Добавить в корзину</button>
-              </form>
-            </div>
+              <div class="detail-adding">
+                <button type="button" class="category_decrement"><i class="fa-solid fa-minus"></i></button>
+                <span id="qty-span">1 шт.</span>
+                <button type="button" class="category_increment"><i class="fa-solid fa-plus"></i></button>
+              </div>
+
+              <button type="submit" class="add-to-cart" disabled>Добавить в корзину</button>
+            </form>
           </div>
         </div>
       </div>
     </div>
   </main>
+
+  <style>
+    .size-options {
+      margin: 1em 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .size-options h3 {
+      width: 100%;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+    .size-option {
+      position: relative;
+      display: inline-block;
+    }
+    .size-option input[type='radio'] {
+      display: none;
+    }
+    .size-option label {
+      display: inline-block;
+      padding: 0.5em 1em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .size-option input[type='radio']:checked + label {
+      background-color: #333;
+      color: #fff;
+      border-color: #333;
+    }
+  </style>
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -50,7 +89,7 @@
       let qty = 1
     
       const addToCartBtn = document.querySelector('.add-to-cart')
-      const variantRadios = document.querySelectorAll('input[name=variant_id]')
+      const variantRadios = document.querySelectorAll('input[name="variant_id"]')
     
       document.querySelector('.category_increment').addEventListener('click', () => {
         qty++
@@ -70,16 +109,12 @@
           const price = parseFloat(this.getAttribute('data-price'))
           priceDisplay.textContent = price.toLocaleString('ru-RU') + ' UZS'
     
-          if (this.checked) {
-            addToCartBtn.disabled = false
-          }
+          addToCartBtn.disabled = !this.checked
         })
       })
-      if (![...variantRadios].some((radio) => radio.checked)) {
-        addToCartBtn.disabled = true
-      } else {
-        addToCartBtn.disabled = false
-      }
+    
+      // disable button until a size is selected
+      addToCartBtn.disabled = ![...variantRadios].some((radio) => radio.checked)
     })
   </script>
 {% endblock %}

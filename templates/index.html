@@ -1,5 +1,4 @@
-{% extends 'base.html' %} {% load static %} {% load humanize %}
-{% block content %}
+{% extends 'base.html' %} {% load static %} {% load humanize %} {% block content %}
   <meta name="csrf-token" content="{{ csrf_token }}" />
   <main class="home-main">
     <div class="category-tags">
@@ -85,10 +84,16 @@
         </div>
       </div>
     </div>
-    <br /><br /><br /><br /><br />
-    <br /><br /><br /><br /><br />
-    <br /><br /><br /><br /><br />
-    <br /><br /><br /><br /><br />
+    <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+    <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+    <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+    <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+    <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+    <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+    <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+    <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+    <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+    <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
   </main>
 
   <style>
@@ -103,14 +108,13 @@
       text-align: center;
       margin-top: 10px;
       width: 100%;
-    
-      &:hover {
-        background: var(--color-white);
-        color: var(--main-color);
-      }
+    }
+    .view-product-btn:hover {
+      background-color: #222;
     }
     
     .category-item.active {
+      background-color: #444;
       color: #fff;
     }
     

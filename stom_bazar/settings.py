@@ -14,7 +14,7 @@ import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-MEDIA_DIR = os.path.join(BASE_DIR, 'media')
+MEDIA_DIR = os.path.join(os.path.dirname(BASE_DIR), 'public_html')
 
 
 
@@ -124,8 +124,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-MEDIA_ROOT = MEDIA_DIR
 MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(MEDIA_DIR, 'media')
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'staticfiles')),
